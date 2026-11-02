@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROJECT NEMESIS // Surveillance Archive (Member 1 Base)</title>
+  <style>
+    /* -------------------------------------------------------------
+       VILLAIN SURVEILLANCE HUD THEME & DESIGN SYSTEM
+       ------------------------------------------------------------- */
+    :root {
+      --bg-core: #090b10;
+      --bg-panel: #0f131a;
+      --bg-panel-alt: #141923;
+      --bg-card: #181f2c;
+      --border-hud: #243046;
+      --accent-crimson: #ff2a5f;
+      --accent-crimson-dim: rgba(255, 42, 95, 0.15);
+      --accent-cyan: #00f0ff;
+      --accent-amber: #ffaa00;
+      --accent-green: #00ff66;
+      --text-muted: #6b7a99;
+      --text-dim: #9daec8;
+      --text-bright: #edf2f9;
+      --font-mono: "SF Mono", "Fira Code", monospace;
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-core);
+      color: var(--text-bright);
+      font-family: var(--font-ui);
+      font-size: 13.5px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 999;
+      background-size: 100% 2px, 3px 100%;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .terminal-wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1720px;
+      margin: 0 auto;
+      padding: 20px 24px 60px 24px;
+    }
+
+    /* Header */
+    header {
+      border: 1px solid var(--border-hud);
+      background: linear-gradient(180deg, rgba(20, 25, 35, 0.85) 0%, rgba(13, 17, 24, 0.95) 100%);
+      border-left: 4px solid var(--accent-crimson);
+      border-radius: 6px;
+      padding: 16px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-group { display: flex; align-items: center; gap: 16px; }
+    .brand-badge {
+      width: 44px; height: 44px; border-radius: 6px;
+      background: var(--accent-crimson-dim);
+      border: 1px solid var(--accent-crimson);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-crimson); font-size: 22px; font-weight: 900;
+    }
+    .brand-title h1 {
+      font-family: var(--font-mono); font-size: 20px; font-weight: 800;
+      letter-spacing: 2px; color: #fff; display: flex; align-items: center; gap: 10px;
+    }
+    .tag-status {
+      font-size: 10px; background: var(--accent-crimson); color: #fff;
+      padding: 2px 7px; border-radius: 3px; letter-spacing: 1px;
+    }
+    .system-status { display: flex; gap: 20px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+    .status-item strong { color: var(--accent-cyan); display: block; }
+
+    /* Controls Panel */
+    .control-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hud);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .search-filter-grid {
+      display: grid; grid-template-columns: 2fr 1.2fr 1.2fr auto; gap: 12px; align-items: center;
+    }
+    @media (max-width: 900px) { .search-filter-grid { grid-template-columns: 1fr; } }
+    .field-label {
+      font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-dim); margin-bottom: 5px; display: block;
+    }
+    .terminal-input, .terminal-select {
+      width: 100%; background: var(--bg-card); border: 1px solid var(--border-hud);
+      border-radius: 4px; color: var(--text-bright); padding: 9px 12px;
+      font-size: 13px; font-family: var(--font-mono); outline: none;
+    }
+    .terminal-input:focus, .terminal-select:focus { border-color: var(--accent-cyan); }
+    .btn-reset {
+      background: rgba(255, 42, 95, 0.12); border: 1px solid var(--accent-crimson);
+      color: var(--accent-crimson); font-family: var(--font-mono); font-size: 12px;
+      padding: 9px 16px; border-radius: 4px; cursor: pointer; text-transform: uppercase;
+      height: 38px; align-self: flex-end;
+    }
+    .controls-subbar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 14px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: var(--font-mono); font-size: 12px;
+    }
+    .pagination-bar { display: flex; align-items: center; gap: 10px; }
+    .nav-btn {
+      background: var(--bg-card); border: 1px solid var(--border-hud);
+      color: var(--text-dim); padding: 5px 10px; font-size: 11px;
+      font-family: var(--font-mono); border-radius: 3px; cursor: pointer;
+    }
+    .nav-btn:hover:not(:disabled) { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+    /* Table */
+    .table-viewport {
+      background: var(--bg-panel); border: 1px solid var(--border-hud);
+      border-radius: 6px; overflow-x: auto; position: relative;
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 1100px; }
+    thead { background: var(--bg-panel-alt); border-bottom: 2px solid var(--border-hud); }
+    th {
+      padding: 12px 14px; font-family: var(--font-mono); font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim);
+    }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { color: var(--accent-cyan); }
+    td { padding: 10px 14px; border-bottom: 1px solid rgba(36, 48, 70, 0.5); }
+    tbody tr:hover { background: rgba(0, 240, 255, 0.05); cursor: pointer; }
+    .hero-thumb { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; }
+
+    /* Banner States */
+    .state-banner { padding: 60px 20px; text-align: center; font-family: var(--font-mono); }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid rgba(0, 240, 255, 0.15);
+      border-top-color: var(--accent-cyan); border-radius: 50%;
+      margin: 0 auto 16px auto; animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Badges */
+    .badge { padding: 3px 8px; border-radius: 3px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; }
+    .badge-good { background: rgba(0, 255, 102, 0.12); color: var(--accent-green); }
+    .badge-bad { background: rgba(255, 42, 95, 0.15); color: var(--accent-crimson); }
+    .badge-neutral { background: rgba(255, 170, 0, 0.12); color: var(--accent-amber); }
+  </style>
+</head>
+<body>
+  <div class="terminal-wrapper">
+    <header>
+      <div class="brand-group">
+        <div class="brand-badge">⚡</div>
+        <div class="brand-title">
+          <h1>PROJECT NEMESIS <span class="tag-status">LEVEL-9 CLEARANCE</span></h1>
+          <p>CONFIDENTIAL HERO SURVEILLANCE &amp; TACTICAL ARCHIVE</p>
+        </div>
+      </div>
+      <div class="system-status">
+        <div class="status-item">
+          <span>SURVEILLANCE POOL</span>
+          <strong id="statTotalTargets">-- TARGETS</strong>
+        </div>
+      </div>
+    </header>
+
+    <div class="control-panel">
+      <div class="search-filter-grid">
+        <div>
+          <label class="field-label" for="searchInput">Intercept Query</label>
+          <input type="text" id="searchInput" class="terminal-input" placeholder="Type pattern..." autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label" for="fieldSelect">Search Vector (Field)</label>
+          <select id="fieldSelect" class="terminal-select">
+            <option value="all">Global (All Vectors)</option>
+            <option value="name">Codename (.name)</option>
+            <option value="fullName">Full Real Name</option>
+            <option value="race">Race / Species</option>
+            <option value="alignment">Moral Alignment</option>
+            <option value="height">Height</option>
+            <option value="weight">Weight</option>
+            <option value="combat">Powerstat: Combat</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="operatorSelect">Analytical Operator</label>
+          <select id="operatorSelect" class="terminal-select">
+            <option value="include">Includes (Sub-string)</option>
+            <option value="exclude">Excludes (Negative)</option>
+            <option value="fuzzy">Fuzzy Algorithmic Match</option>
+            <option value="eq">Equal (=)</option>
+            <option value="gt">Greater Than (&gt;)</option>
+            <option value="lt">Less Than (&lt;)</option>
+          </select>
+        </div>
+        <button id="btnResetFilters" class="btn-reset">Reset</button>
+      </div>
+
+      <div class="controls-subbar">
+        <div>IDENTIFIED: <strong id="filterMatchCount">0</strong> OF <strong id="totalRecordCount">0</strong></div>
+        <div class="pagination-bar">
+          <label>PAGE SIZE:
+            <select id="pageSizeSelect" class="terminal-select" style="width: auto; padding: 3px 6px;">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all">ALL</option>
+            </select>
+          </label>
+          <button class="nav-btn" id="btnFirst">|&lt;</button>
+          <button class="nav-btn" id="btnPrev">&lt;</button>
+          <span id="pageIndicator" style="padding: 0 8px;">PAGE 1 / 1</span>
+          <button class="nav-btn" id="btnNext">&gt;</button>
+          <button class="nav-btn" id="btnLast">&gt;|</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-viewport">
+      <table id="heroesTable">
+        <thead>
+          <tr>
+            <th style="width: 50px;">ICON</th>
+            <th class="sortable" data-col="name">CODENAME <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="fullName">REAL NAME <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="powerstats">POWERSTATS <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="race">RACE <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="gender">GENDER <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="height">HEIGHT <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="weight">WEIGHT <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="placeOfBirth">PLACE OF BIRTH <span class="sort-icon">▲▼</span></th>
+            <th class="sortable" data-col="alignment">ALIGNMENT <span class="sort-icon">▲▼</span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+
+      <div id="loadingBanner" class="state-banner">
+        <div class="spinner"></div>
+        <h3>INFILTRATING SATELLITE NETWORK...</h3>
+        <p>Fetching and decrypting superhero archives...</p>
+      </div>
+      <div id="emptyBanner" class="state-banner" style="display: none;">
+        <h3 style="color: var(--accent-crimson);">ZERO TARGETS IDENTIFIED</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- External Member Scripts (Loaded in integration phase if present) -->
+  <script src="member2_filter.js"></script>
+  <script src="member3_table_sort.js"></script>
+  <script src="member4_modal_url.js"></script>
+
+  <!-- MEMBER 1 MAIN SCRIPT: Fetching, State & Dispatcher -->
+  <script>
+    // -------------------------------------------------------------
+    // SHARED APPLICATION STATE (Contract for all members)
+    // -------------------------------------------------------------
+    const AppState = {
+      allHeroes: [],
+      filteredHeroes: [],
+      searchQuery: "",
+      searchField: "all",
+      searchOperator: "include",
+      sortColumn: "name",
+      sortDirection: "asc",
+      currentPage: 1,
+      pageSize: 20,
+      activeHeroId: null
+    };
+
+    // -------------------------------------------------------------
+    // SELF-CONTAINED FALLBACK MODULES
+    // Allows Member 1 to run and test the app independently!
+    // -------------------------------------------------------------
+    const DefaultFilterModule = {
+      filterHeroes: function(heroes, query, field, op) {
+        if (!query) return heroes;
+        const q = query.toLowerCase().trim();
+        return heroes.filter(h => {
+          const target = (field === "all")
+            ? `${h.name} ${h.biography?.fullName || ""} ${h.appearance?.race || ""}`.toLowerCase()
+            : String(h[field] || h.biography?.[field] || h.appearance?.[field] || "").toLowerCase();
+          
+          if (op === "exclude") return !target.includes(q);
+          return target.includes(q);
+        });
+      }
+    };
+
+    const DefaultSortModule = {
+      sortHeroes: function(list, col, direction) {
+        const isAsc = direction === "asc";
+        return list.slice().sort((a, b) => {
+          const valA = a[col] || a.biography?.[col] || a.appearance?.[col] || "";
+          const valB = b[col] || b.biography?.[col] || b.appearance?.[col] || "";
+          return isAsc
+            ? String(valA).localeCompare(String(valB), undefined, { numeric: true })
+            : String(valB).localeCompare(String(valA), undefined, { numeric: true });
+        });
+      }
+    };
+
+    const DefaultTableModule = {
+      render: function(state) {
+        const tbody = document.getElementById("tableBody");
+        const emptyBanner = document.getElementById("emptyBanner");
+        const list = state.filteredHeroes;
+
+        document.getElementById("filterMatchCount").textContent = list.length;
+        document.getElementById("totalRecordCount").textContent = state.allHeroes.length;
+
+        if (list.length === 0) {
+          tbody.innerHTML = "";
+          emptyBanner.style.display = "block";
+          return;
+        }
+        emptyBanner.style.display = "none";
+
+        const pSize = state.pageSize === "all" ? list.length : parseInt(state.pageSize, 10);
+        const totalPages = Math.max(1, Math.ceil(list.length / pSize));
+        if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+        const start = (state.currentPage - 1) * pSize;
+        const pageItems = list.slice(start, start + pSize);
+
+        document.getElementById("btnFirst").disabled = state.currentPage <= 1;
+        document.getElementById("btnPrev").disabled = state.currentPage <= 1;
+        document.getElementById("btnNext").disabled = state.currentPage >= totalPages || state.pageSize === "all";
+        document.getElementById("btnLast").disabled = state.currentPage >= totalPages || state.pageSize === "all";
+        document.getElementById("pageIndicator").textContent = `PAGE ${state.currentPage} / ${totalPages}`;
+
+        let rows = "";
+        for (const h of pageItems) {
+          const img = h.images?.xs || "https://placehold.co/36x36/141923/ff2a5f?text=?";
+          const fullName = h.biography?.fullName || "-";
+          const race = h.appearance?.race || "-";
+          const gender = h.appearance?.gender || "-";
+          const height = (h.appearance?.height || []).join(" / ") || "-";
+          const weight = (h.appearance?.weight || []).join(" / ") || "-";
+          const birth = h.biography?.placeOfBirth || "-";
+          const align = h.biography?.alignment || "unknown";
+
+          rows += `
+            <tr data-hero-id="${h.id}">
+              <td><img src="${img}" class="hero-thumb" alt="${h.name}"></td>
+              <td><strong>${h.name}</strong></td>
+              <td><em>${fullName}</em></td>
+              <td>${h.powerstats?.combat ?? "-"} COM / ${h.powerstats?.intelligence ?? "-"} INT</td>
+              <td>${race}</td>
+              <td>${gender}</td>
+              <td>${height}</td>
+              <td>${weight}</td>
+              <td>${birth}</td>
+              <td><span class="badge badge-${align}">${align.toUpperCase()}</span></td>
+            </tr>
+          `;
+        }
+        tbody.innerHTML = rows;
+      }
+    };
+
+    // -------------------------------------------------------------
+    // MAIN PIPELINE DISPATCHER
+    // -------------------------------------------------------------
+    function processAndRender() {
+      // 1. Member 2 Filter step (uses member2 module if loaded, else fallback)
+      const filterEngine = (typeof FilterModule !== "undefined") ? FilterModule : DefaultFilterModule;
+      const filtered = filterEngine.filterHeroes(
+        AppState.allHeroes,
+        AppState.searchQuery,
+        AppState.searchField,
+        AppState.searchOperator
+      );
+
+      // 2. Member 3 Sort step (uses member3 module if loaded, else fallback)
+      const sortEngine = (typeof SortModule !== "undefined") ? SortModule : DefaultSortModule;
+      const sorted = sortEngine.sortHeroes(filtered, AppState.sortColumn, AppState.sortDirection);
+      AppState.filteredHeroes = sorted;
+
+      // 3. Member 3 Table & Pagination rendering
+      const tableEngine = (typeof TablePaginationModule !== "undefined") ? TablePaginationModule : DefaultTableModule;
+      tableEngine.render(AppState);
+
+      // 4. Member 4 URL state sync
+      if (typeof UrlModalModule !== "undefined") {
+        UrlModalModule.updateUrlState(AppState);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // UI EVENT LISTENERS
+    // -------------------------------------------------------------
+    function setupControls() {
+      const searchInput = document.getElementById("searchInput");
+      const fieldSelect = document.getElementById("fieldSelect");
+      const operatorSelect = document.getElementById("operatorSelect");
+      const pageSizeSelect = document.getElementById("pageSizeSelect");
+      const btnReset = document.getElementById("btnResetFilters");
+
+      // Live search input
+      let debounceTimer = null;
+      searchInput.addEventListener("input", (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          AppState.searchQuery = e.target.value;
+          AppState.currentPage = 1;
+          processAndRender();
+        }, 80);
+      });
+
+      // Select dropdowns
+      fieldSelect.addEventListener("change", (e) => {
+        AppState.searchField = e.target.value;
+        AppState.currentPage = 1;
+        processAndRender();
+      });
+
+      operatorSelect.addEventListener("change", (e) => {
+        AppState.searchOperator = e.target.value;
+        AppState.currentPage = 1;
+        processAndRender();
+      });
+
+      pageSizeSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        AppState.pageSize = val === "all" ? "all" : parseInt(val, 10);
+        AppState.currentPage = 1;
+        processAndRender();
+      });
+
+      // Reset button
+      btnReset.addEventListener("click", () => {
+        AppState.searchQuery = "";
+        AppState.searchField = "all";
+        AppState.searchOperator = "include";
+        AppState.sortColumn = "name";
+        AppState.sortDirection = "asc";
+        AppState.currentPage = 1;
+
+        searchInput.value = "";
+        fieldSelect.value = "all";
+        operatorSelect.value = "include";
+        pageSizeSelect.value = "20";
+        processAndRender();
+      });
+
+      // Pagination clicks
+      document.getElementById("btnFirst").addEventListener("click", () => {
+        if (AppState.currentPage > 1) {
+          AppState.currentPage = 1;
+          processAndRender();
+        }
+      });
+
+      document.getElementById("btnPrev").addEventListener("click", () => {
+        if (AppState.currentPage > 1) {
+          AppState.currentPage--;
+          processAndRender();
+        }
+      });
+
+      document.getElementById("btnNext").addEventListener("click", () => {
+        AppState.currentPage++;
+        processAndRender();
+      });
+
+      document.getElementById("btnLast").addEventListener("click", () => {
+        if (AppState.pageSize !== "all") {
+          AppState.currentPage = Math.ceil(AppState.filteredHeroes.length / AppState.pageSize);
+          processAndRender();
+        }
+      });
+
+      // Sorting column clicks
+      document.querySelectorAll("th.sortable").forEach(th => {
+        th.addEventListener("click", () => {
+          const col = th.getAttribute("data-col");
+          if (AppState.sortColumn === col) {
+            AppState.sortDirection = AppState.sortDirection === "asc" ? "desc" : "asc";
+          } else {
+            AppState.sortColumn = col;
+            AppState.sortDirection = "asc";
+          }
+          processAndRender();
+        });
+      });
+
+      // Table row modal trigger
+      document.getElementById("tableBody").addEventListener("click", (e) => {
+        const tr = e.target.closest("tr");
+        if (tr && tr.dataset.heroId && typeof UrlModalModule !== "undefined") {
+          UrlModalModule.openHeroModal(tr.dataset.heroId, AppState.allHeroes);
+        }
+      });
+    }
+
+    // -------------------------------------------------------------
+    // DATA INGESTION (FETCH API)
+    // -------------------------------------------------------------
+    window.addEventListener("DOMContentLoaded", () => {
+      setupControls();
+
+      // If Member 4 module is present, restore URL parameters first
+      if (typeof UrlModalModule !== "undefined") {
+        UrlModalModule.restoreFromUrl(AppState);
+        document.getElementById("searchInput").value = AppState.searchQuery;
+        document.getElementById("fieldSelect").value = AppState.searchField;
+        document.getElementById("operatorSelect").value = AppState.searchOperator;
+      }
+
+      fetch("https://rawcdn.githack.com/akabab/superhero-api/0.2.0/api/all.json")
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById("loadingBanner").style.display = "none";
+          AppState.allHeroes = Array.isArray(data) ? data : [];
+          document.getElementById("statTotalTargets").textContent = `${AppState.allHeroes.length} TARGETS`;
+          processAndRender();
+        })
+        .catch(err => {
+          document.getElementById("loadingBanner").innerHTML = `
+            <h3 style="color:var(--accent-crimson)">FETCH ERROR</h3>
+            <p style="color:var(--text-dim); margin-top: 8px;">${err.message}</p>
+          `;
+        });
+    });
+  </script>
+</body>
+</html>
